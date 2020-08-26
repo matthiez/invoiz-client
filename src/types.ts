@@ -189,16 +189,15 @@ export type Invoice = {
     type: 'invoice'
 }
 
-export type Micellaneous = {
-    data: {
-        articleCategories: string[]
-        articleUnits: string[]
-        autoCreateArticles: boolean
-        customerCategories: string[]
-        jobTitles: string[]
-        salutations: string[]
-        titles: string[]
-    }
+export type Miscellaneous = {
+    articleCategories: string[]
+    articleUnits: string[]
+    autoCreateArticles: boolean
+    customerCategories: string[]
+    jobTitles: string[]
+    salutations: string[]
+    titles: string[]
+    vats: number[]
 }
 
 export type Offer = {

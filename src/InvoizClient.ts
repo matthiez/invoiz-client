@@ -19,7 +19,7 @@ import {
     InvoiceMailParams,
     InvoicePaginationOptions,
     InvoicePayment,
-    Micellaneous,
+    Miscellaneous,
     Offer,
     OfferPaginationOptions,
     PaginatedArticles,
@@ -117,7 +117,7 @@ export default class InvoizClient extends AbstractClient {
         });
     }
 
-    async getMiscellaneousSettings(): Promise<Micellaneous | null> {
+    async getMiscellaneousSettings(): Promise<Miscellaneous | null> {
         return this.tryCatch({
             method: 'GET',
             url: Endpoint.SettingMiscellaneous,
