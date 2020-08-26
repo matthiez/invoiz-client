@@ -26,7 +26,8 @@ import {
     PaginatedCustomers,
     PaginatedEntityExpenses,
     PaginatedEntityInvoices,
-    PaginatedOffers, PaginatedToDos,
+    PaginatedOffers,
+    PaginatedToDos,
     PayCondition,
     ResponseArticle,
     ResponseCustomer,
@@ -38,20 +39,20 @@ import {
 } from './types';
 import {AbstractClient} from './AbstractClient';
 
-export default class InvoizClient extends AbstractClient {
+export class InvoizClient extends AbstractClient {
     constructor(apiKey: string, apiKeySecret: string) {
         super(apiKey, apiKeySecret);
     }
 
-    async addInvoicePayment(id: number, data: InvoicePayment): Promise<EntityInvoicePayment> {
-        return this.tryCatch({
+    addInvoicePayment = async (id: number, data: InvoicePayment):
+        Promise<EntityInvoicePayment> =>
+        this.tryCatch({
             data,
             method: 'POST',
             url: `${Endpoint.Invoice}/${id}/payment`,
         });
-    }
 
-    async authToken(installationId: string): Promise<AuthTokenResponse> {
+    authToken = async (installationId: string): Promise<AuthTokenResponse> => {
         const response = await this.tryCatch<AuthTokenResponse>({
             data: {installationId},
             method: 'POST',
@@ -61,99 +62,87 @@ export default class InvoizClient extends AbstractClient {
         this.accessToken = response.token;
 
         return response;
-    }
+    };
 
-    async downloadInvoice(id: number): Promise<Blob | null> {
-        return this.tryCatch({
+    downloadInvoice = async (id: number): Promise<Buffer> =>
+        this.tryCatch({
             method: 'GET',
             url: `${Endpoint.Invoice}/${id}/download`,
         });
-    }
 
-    async getArticle(id: number): Promise<ResponseArticle> {
-        return this.getById<EntityArticle>(id, Endpoint.Article);
-    }
+    getArticle = async (id: number): Promise<ResponseArticle> =>
+        this.getById<EntityArticle>(id, Endpoint.Article);
 
-    async getArticles(params?: ArticlePaginationOptions): Promise<PaginatedArticles> {
-        return this.paginated<EntityArticle>(Endpoint.Article, params);
-    }
+    getArticles = async (params?: ArticlePaginationOptions): Promise<PaginatedArticles> =>
+        this.paginated<EntityArticle>(Endpoint.Article, params);
 
-    async getCustomer(id: number): Promise<ResponseCustomer> {
-        return this.getById<Customer>(id, Endpoint.Customer);
-    }
+    getCustomer = async (id: number): Promise<ResponseCustomer> =>
+        this.getById<Customer>(id, Endpoint.Customer);
 
-    async getCustomers(params?: CustomerPaginationOptions): Promise<PaginatedCustomers> {
-        return this.paginated<Customer>(Endpoint.Customer, params);
-    }
+    getCustomers = async (params?: CustomerPaginationOptions):
+        Promise<PaginatedCustomers> =>
+        this.paginated<Customer>(Endpoint.Customer, params);
 
-    async getExpense(id: number): Promise<ResponseExpense> {
-        return this.getById<EntityExpense>(id, Endpoint.Expense);
-    }
+    getExpense = async (id: number): Promise<ResponseExpense> =>
+        this.getById<EntityExpense>(id, Endpoint.Expense);
 
-    async getExpenses(params?: ExpensePaginationOptions): Promise<PaginatedEntityExpenses> {
-        return this.paginated<EntityExpense>(Endpoint.Expense, params);
-    }
+    getExpenses = async (params?: ExpensePaginationOptions):
+        Promise<PaginatedEntityExpenses> =>
+        this.paginated<EntityExpense>(Endpoint.Expense, params);
 
-    async getInvoice(id: number): Promise<ResponseInvoice> {
-        return this.getById<EntityInvoice>(id, Endpoint.Invoice);
-    }
+    getInvoice = async (id: number): Promise<ResponseInvoice> =>
+        this.getById<EntityInvoice>(id, Endpoint.Invoice);
 
-    async getInvoices(params?: InvoicePaginationOptions): Promise<PaginatedEntityInvoices> {
-        return this.paginated<EntityInvoice>(Endpoint.Invoice, params);
-    }
+    getInvoices = async (params?: InvoicePaginationOptions):
+        Promise<PaginatedEntityInvoices> =>
+        this.paginated<EntityInvoice>(Endpoint.Invoice, params);
 
-    async getOffer(id: number): Promise<ResponseOffer> {
-        return this.getById<Offer>(id, Endpoint.Offer);
-    }
+    getOffer = async (id: number): Promise<ResponseOffer> =>
+        this.getById<Offer>(id, Endpoint.Offer);
 
-    async getOffers(params?: OfferPaginationOptions): Promise<PaginatedOffers> {
-        return this.paginated<Offer>(Endpoint.Offer, params);
-    }
+    getOffers = async (params?: OfferPaginationOptions): Promise<PaginatedOffers> =>
+        this.paginated<Offer>(Endpoint.Offer, params);
 
-    async getPayConditions(): Promise<EntityPayCondition[] | null> {
-        return this.tryCatch({
+    getPayConditions = async (): Promise<EntityPayCondition[]> =>
+        this.tryCatch({
             method: 'GET',
             url: Endpoint.SettingPayCondition,
         });
-    }
 
-    async getMiscellaneousSettings(): Promise<Miscellaneous | null> {
-        return this.tryCatch({
+    getMiscellaneousSettings = async (): Promise<Miscellaneous> =>
+        this.tryCatch({
             method: 'GET',
             url: Endpoint.SettingMiscellaneous,
         });
-    }
 
-    async getToDos(params?: ToDoPaginationOptions): Promise<PaginatedToDos> {
-        return this.paginated<EntityToDo>(Endpoint.ToDo, params);
-    }
+    getToDos = async (params?: ToDoPaginationOptions): Promise<PaginatedToDos> =>
+        this.paginated<EntityToDo>(Endpoint.ToDo, params);
 
-    async addArticle(data: Article): Promise<EntityArticle | null> {
+    addArticle = async (data: Article): Promise<EntityArticle> => {
         return this.tryCatch({
             data,
             method: 'POST',
             url: Endpoint.Article,
         });
-    }
+    };
 
-    async addArticleSetting(data: ArticleSetting): Promise<ArticleSetting | null> {
-        return this.tryCatch({
+    addArticleSetting = async (data: ArticleSetting): Promise<ArticleSetting> =>
+        this.tryCatch({
             data,
             method: 'POST',
             url: Endpoint.SettingArticle,
         });
-    }
 
-    async addExpense(data: Expense): Promise<EntityExpense | null> {
-        return this.tryCatch({
+    addExpense = async (data: Expense): Promise<EntityExpense> =>
+        this.tryCatch({
             data,
             method: 'POST',
             url: Endpoint.Expense,
         });
-    }
 
-    async addExpenseReceipt(filename: string, receipt: string): Promise<ExpenseReceipt[] | null> {
-        return this.tryCatch({
+    addExpenseReceipt = async (filename: string, receipt: string):
+        Promise<ExpenseReceipt[]> =>
+        this.tryCatch({
             data: {
                 filename, receipt,
             },
@@ -163,73 +152,63 @@ export default class InvoizClient extends AbstractClient {
             method: 'POST',
             url: Endpoint.ExpenseReceipt,
         });
-    }
 
-    async addInvoice(id: number): Promise<void | null> {
-        return this.tryCatch({
+    lockAndFinalizeInvoice = async (id: number): Promise<void> =>
+        this.tryCatch({
             method: 'PUT',
             url: `${Endpoint.Invoice}/${id}/lock`,
         });
-    }
 
-    async addPayCondition(data: PayCondition): Promise<EntityPayCondition | null> {
-        return this.tryCatch({
+    addPayCondition = async (data: PayCondition): Promise<EntityPayCondition> =>
+        this.tryCatch({
             data,
             method: 'POST',
             url: Endpoint.SettingPayCondition,
         });
-    }
 
-    async addToDo(data: ToDo): Promise<EntityToDo | null> {
-        return this.tryCatch({
+    addToDo = async (data: ToDo): Promise<EntityToDo> =>
+        this.tryCatch({
             data,
             method: 'POST',
             url: Endpoint.ToDo,
         });
-    }
 
-    async lockAndFinalizeInvoice(data: Invoice): Promise<EntityInvoice | null> {
-        return this.tryCatch({
+    addInvoice = async (data: Invoice): Promise<EntityInvoice> =>
+        this.tryCatch({
             data,
             method: 'POST',
             url: `v2/${Endpoint.Invoice}`,
         });
-    }
 
-    async mailInvoice(id: number, data: InvoiceMailParams): Promise<EntityInvoicePayment | null> {
-        return this.tryCatch({
+    mailInvoice = async (id: number, data: InvoiceMailParams)
+        : Promise<EntityInvoicePayment> =>
+        this.tryCatch({
             data,
             method: 'POST',
             url: `${Endpoint.Invoice}/${id}/send`,
         });
-    }
 
-    async markToDoAsDone(id: number): Promise<EntityToDo | null> {
-        return this.tryCatch({
+    markToDoAsDone = async (id: number): Promise<EntityToDo> =>
+        this.tryCatch({
             method: 'PUT',
             url: `${Endpoint.ToDo}/${id}/doneAt`,
         });
-    }
 
-    async removeExpenseReceipt(id: number): Promise<void | null> {
-        return this.tryCatch({
+    removeExpenseReceipt = async (id: number): Promise<void> =>
+        this.tryCatch({
             method: 'DELETE',
             url: `${Endpoint.ExpenseReceipt}/${id}`,
         });
-    }
 
-    async removeToDo(id: number): Promise<void | null> {
-        return this.tryCatch({
-            method: 'DELETE',
-            url: `${Endpoint.ToDo}/${id}`,
-        });
-    }
+    removeToDo = async (id: number): Promise<void> => this.tryCatch({
+        method: 'DELETE',
+        url: `${Endpoint.ToDo}/${id}`,
+    });
 
-    async resetToDoDate(id: number, date: string): Promise<EntityToDo | null> {
-        return this.tryCatch({
+    resetToDoDate = async (id: number, date: string): Promise<EntityToDo> =>
+        this.tryCatch({
             data: {date},
             method: 'PUT',
             url: `${Endpoint.ToDo}/${id}/date`,
         });
-    }
 }

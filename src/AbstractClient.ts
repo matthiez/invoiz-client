@@ -1,14 +1,14 @@
 import Axios, {AxiosInstance, AxiosRequestConfig} from 'axios';
 import {ApiResponse, BasePaginationOptions, Endpoint, PaginatedResponse,} from './types';
 
-export class AbstractClient {
+export abstract class AbstractClient {
     protected accessToken?: string;
 
     protected instance: AxiosInstance = Axios.create({
         baseURL: 'https://app.invoiz.de/api/',
     });
 
-    constructor(protected apiKey: string, protected apiKeySecret: string) {
+    protected constructor(protected apiKey: string, protected apiKeySecret: string) {
     }
 
     protected get axios(): AxiosInstance {

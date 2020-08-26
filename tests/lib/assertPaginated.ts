@@ -1,4 +1,4 @@
-import {BasePaginationOptions, PaginatedResponse} from '../../src';
+import {BasePaginationOptions, PaginatedResponse} from '../../src/types';
 
 export default <T>(paginated: PaginatedResponse<T>, opts: BasePaginationOptions, assert: (i: T, o: BasePaginationOptions) => void): void => {
     const items = paginated.data;

@@ -1,4 +1,4 @@
-import InvoizClient from '../../src/InvoizClient';
+import {InvoizClient} from '../../src';
 import environment from './environment';
 
 if (!environment.apiKey) {

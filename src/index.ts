@@ -1,5 +1,3 @@
-import InvoizClient from './InvoizClient';
-
-export * from './types';
+import {InvoizClient} from './InvoizClient';
 
 export default InvoizClient;

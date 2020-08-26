@@ -1,4 +1,4 @@
-import {ArticlePaginationOptions, EntityArticle, PaginatedArticles,} from '../src';
+import {ArticlePaginationOptions, EntityArticle, PaginatedArticles,} from '../src/types';
 import assertPaginated from './lib/assertPaginated';
 import client from './lib/client';
 

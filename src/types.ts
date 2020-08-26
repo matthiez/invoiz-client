@@ -1,4 +1,4 @@
-import InvoizClient from './InvoizClient';
+import InvoizClient from './index';
 
 export enum Endpoint {
     Article = 'article',
@@ -234,6 +234,7 @@ export type ToDo = {
     metaData?: {
         description?: string
     }
+    tenantId?: number
 }
 
 export type EntityArticle = Entity & Article;
@@ -263,4 +264,4 @@ export type PaginatedMethod = keyof Pick<InvoizClient,
 export type ParameterlessGetMethod = keyof Pick<InvoizClient,
     'getMiscellaneousSettings' | 'getPayConditions'>;
 
-export type GetMethod = PaginatedMethod | ParameterlessGetMethod;
+export type RetrieveMethod = PaginatedMethod | ParameterlessGetMethod;

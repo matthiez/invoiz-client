@@ -4,6 +4,8 @@
         "module": "CommonJS",
         "noEmit": true,
         "strict": true,
-        "target": "ES5"
-    }
+        "target": "ES5",
+        "rootDir": "./tests"
+    },
+    "include": ["tests/**/*"]
 }
