@@ -1,3 +1,5 @@
+import InvoizClient from './InvoizClient';
+
 export enum Endpoint {
     Article = 'article',
     AuthToken = 'auth/token',
@@ -247,9 +249,19 @@ export type PaginatedCustomers = PaginatedResponse<Customer>;
 export type PaginatedEntityExpenses = PaginatedResponse<EntityExpense>;
 export type PaginatedEntityInvoices = PaginatedResponse<EntityInvoice>;
 export type PaginatedOffers = PaginatedResponse<Offer>;
+export type PaginatedToDos = PaginatedResponse<EntityToDo>;
 
 export type ResponseArticle = ApiResponse<EntityArticle>;
 export type ResponseCustomer = ApiResponse<Customer>;
 export type ResponseExpense = ApiResponse<EntityExpense>;
 export type ResponseInvoice = ApiResponse<EntityInvoice>;
 export type ResponseOffer = ApiResponse<Offer>;
+
+export type PaginatedMethod = keyof Pick<InvoizClient,
+    'getOffers' | 'getArticles' | 'getToDos'
+    | 'getCustomers' | 'getExpenses' | 'getInvoices'>;
+
+export type ParameterlessGetMethod = keyof Pick<InvoizClient,
+    'getMiscellaneousSettings' | 'getPayConditions'>;
+
+export type GetMethod = PaginatedMethod | ParameterlessGetMethod;

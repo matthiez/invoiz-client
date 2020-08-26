@@ -26,7 +26,7 @@ import {
     PaginatedCustomers,
     PaginatedEntityExpenses,
     PaginatedEntityInvoices,
-    PaginatedOffers,
+    PaginatedOffers, PaginatedToDos,
     PayCondition,
     ResponseArticle,
     ResponseCustomer,
@@ -124,12 +124,8 @@ export default class InvoizClient extends AbstractClient {
         });
     }
 
-    async getToDos(params?: ToDoPaginationOptions): Promise<EntityToDo | null> {
-        return this.tryCatch({
-            params,
-            method: 'GET',
-            url: Endpoint.ToDo,
-        });
+    async getToDos(params?: ToDoPaginationOptions): Promise<PaginatedToDos> {
+        return this.paginated<EntityToDo>(Endpoint.ToDo, params);
     }
 
     async addArticle(data: Article): Promise<EntityArticle | null> {
