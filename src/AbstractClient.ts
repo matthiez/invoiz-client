@@ -1,33 +1,62 @@
 import Axios, {AxiosInstance, AxiosRequestConfig} from 'axios';
-import {ApiResponse, BasePaginationOptions, Endpoint, PaginatedResponse,} from './types';
+import {
+    ApiResponse,
+    AuthTokenResponse,
+    BasePaginationOptions,
+    Endpoint,
+    PaginatedResponse,
+} from './types';
 
 export abstract class AbstractClient {
-    protected accessToken?: string;
-
     protected instance: AxiosInstance = Axios.create({
         baseURL: 'https://app.invoiz.de/api/',
     });
+    protected accessToken?: string;
 
-    protected constructor(protected apiKey: string, protected apiKeySecret: string) {
+    public constructor(
+        protected apiKey: string,
+        protected apiKeySecret: string,
+        protected installationId: string,
+        accessToken?: string) {
+        if (accessToken) {
+            this.setAccessToken(accessToken);
+        }
     }
 
-    protected get axios(): AxiosInstance {
-        if (this.accessToken) {
-            this.instance.defaults.headers.Authorization = `Bearer ${this.accessToken}`;
-        } else {
-            delete this.instance.defaults.headers.Authorization;
-
-            this.instance.defaults.auth = {
+    async authToken():
+        Promise<AuthTokenResponse> {
+        const response = await this.tryCatch<AuthTokenResponse>({
+            auth: {
                 password: this.apiKeySecret,
                 username: this.apiKey,
-            };
-        }
+            },
+            data: {installationId: this.installationId},
+            method: 'POST',
+            url: Endpoint.AuthToken,
+        }, false);
 
-        return this.instance;
+        this.setAccessToken(response.token);
+
+        return response;
+    };
+
+    getAccessToken(): string | undefined {
+        return this.accessToken;
     }
 
     setAccessToken(accessToken: string): void {
-        this.accessToken = accessToken;
+        this.accessToken =
+            accessToken.startsWith('Bearer ') ? accessToken : `Bearer ${accessToken}`;
+    }
+
+    protected async axios(): Promise<AxiosInstance> {
+        if (!this.getAccessToken()) {
+            await this.authToken();
+        }
+
+        this.instance.defaults.headers.Authorization = this.accessToken;
+
+        return this.instance;
     }
 
     protected async getById<T>(id: number, endpoint: Endpoint): Promise<ApiResponse<T>> {
@@ -37,24 +66,28 @@ export abstract class AbstractClient {
         });
     }
 
-    protected async paginated<T>(endpoint: string, params?: BasePaginationOptions): Promise<PaginatedResponse<T>> {
-        try {
-            const response = await this.axios.get(endpoint, {
-                params,
-            });
-
-            return response.data;
-        } catch (err) {
-            throw err;
-        }
+    protected async paginated<T>(endpoint: string, params?: BasePaginationOptions)
+        : Promise<PaginatedResponse<T>> {
+        return this.tryCatch({
+            method: 'GET',
+            params,
+            url: endpoint,
+        });
     }
 
-    protected async tryCatch<T = {}>(cfg: AxiosRequestConfig): Promise<T> {
+    protected async tryCatch<T = {}>(cfg: AxiosRequestConfig, retry: boolean = true): Promise<T> {
         try {
-            const response = await this.axios.request(cfg);
+            const axios = await this.axios();
+            const response = await axios.request(cfg);
 
             return response.data;
         } catch (err) {
+            if (retry && 403 === err.response.status) {
+                await this.authToken();
+
+                return await this.tryCatch<T>(cfg, false);
+            }
+
             throw err;
         }
     }

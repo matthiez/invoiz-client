@@ -40,10 +40,6 @@ import {
 import {AbstractClient} from './AbstractClient';
 
 export class InvoizClient extends AbstractClient {
-    constructor(apiKey: string, apiKeySecret: string) {
-        super(apiKey, apiKeySecret);
-    }
-
     addInvoicePayment = async (id: number, data: InvoicePayment):
         Promise<EntityInvoicePayment> =>
         this.tryCatch({
@@ -51,18 +47,6 @@ export class InvoizClient extends AbstractClient {
             method: 'POST',
             url: `${Endpoint.Invoice}/${id}/payment`,
         });
-
-    authToken = async (installationId: string): Promise<AuthTokenResponse> => {
-        const response = await this.tryCatch<AuthTokenResponse>({
-            data: {installationId},
-            method: 'POST',
-            url: Endpoint.AuthToken,
-        });
-
-        this.accessToken = response.token;
-
-        return response;
-    };
 
     downloadInvoice = async (id: number): Promise<Buffer> =>
         this.tryCatch({
