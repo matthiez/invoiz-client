@@ -82,7 +82,7 @@ export abstract class AbstractClient {
 
             return response.data;
         } catch (err) {
-            if (retry && 403 === err.response.status) {
+            if (retry && 401 === err.response.status) {
                 await this.authToken();
 
                 return await this.tryCatch<T>(cfg, false);
