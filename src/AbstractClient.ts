@@ -10,8 +10,8 @@ import {
 export abstract class AbstractClient {
     protected instance: AxiosInstance = Axios.create({
         baseURL: 'https://app.invoiz.de/api/',
+
     });
-    protected accessToken?: string;
 
     public constructor(
         protected apiKey: string,
@@ -21,11 +21,23 @@ export abstract class AbstractClient {
         if (accessToken) {
             this.setAccessToken(accessToken);
         }
+
+        this.instance.interceptors.request.use(async cfg => {
+            if (!cfg.headers.Authorization && !cfg.auth) {
+                const token = (await this.authToken()).token;
+
+                this.setAccessToken(token);
+
+                cfg.headers.Authorization = this.getAccessToken();
+            }
+
+            return cfg;
+        }, err => Promise.reject(err));
     }
 
     async authToken():
         Promise<AuthTokenResponse> {
-        const response = await this.tryCatch<AuthTokenResponse>({
+        return this.tryCatch<AuthTokenResponse>({
             auth: {
                 password: this.apiKeySecret,
                 username: this.apiKey,
@@ -33,34 +45,32 @@ export abstract class AbstractClient {
             data: {installationId: this.installationId},
             method: 'POST',
             url: Endpoint.AuthToken,
-        }, false);
-
-        this.setAccessToken(response.token);
-
-        return response;
+        });
     };
 
-    getAccessToken(): string | undefined {
-        return this.accessToken;
-    }
+    getAccessToken(strip: boolean = false): string | undefined {
+        const accessToken = this.instance.defaults.headers.Authorization;
 
-    setAccessToken(accessToken: string): void {
-        this.accessToken =
-            accessToken.startsWith('Bearer ') ? accessToken : `Bearer ${accessToken}`;
-    }
-
-    protected async axios(): Promise<AxiosInstance> {
-        if (!this.getAccessToken()) {
-            await this.authToken();
+        if (accessToken && strip) {
+            return accessToken.replace('Bearer ', '');
         }
 
-        this.instance.defaults.headers.Authorization = this.accessToken;
+        return accessToken;
+    }
 
-        return this.instance;
+    setAccessToken(accessToken?: string): void {
+        if (accessToken) {
+            accessToken =
+                accessToken.startsWith('Bearer ') ? accessToken : `Bearer ${accessToken}`;
+
+            this.instance.defaults.headers.Authorization = accessToken;
+        } else {
+            delete this.instance.defaults.headers.Authorization;
+        }
     }
 
     protected async getById<T>(id: number, endpoint: Endpoint): Promise<ApiResponse<T>> {
-        return this.tryCatch({
+        return this.retry({
             method: 'GET',
             url: `${endpoint}/${id}`,
         });
@@ -68,26 +78,37 @@ export abstract class AbstractClient {
 
     protected async paginated<T>(endpoint: string, params?: BasePaginationOptions)
         : Promise<PaginatedResponse<T>> {
-        return this.tryCatch({
+        return this.retry({
             method: 'GET',
             params,
             url: endpoint,
         });
     }
 
-    protected async tryCatch<T = {}>(cfg: AxiosRequestConfig, retry: boolean = true): Promise<T> {
+    protected async retry<T = {}>(cfg: AxiosRequestConfig): Promise<T> {
         try {
-            const axios = await this.axios();
-            const response = await axios.request(cfg);
-
-            return response.data;
+            return await this.tryCatch(cfg);
         } catch (err) {
-            if (retry && 401 === err.response.status) {
-                await this.authToken();
+            if (401 === err.response.status) {
+                this.setAccessToken();
 
-                return await this.tryCatch<T>(cfg, false);
+                try {
+                    return await this.tryCatch(cfg);
+                } catch (err) {
+                    throw err;
+                }
             }
 
+            throw err;
+        }
+    }
+
+    protected async tryCatch<T = {}>(cfg: AxiosRequestConfig): Promise<T> {
+        const getData = async () => (await this.instance.request(cfg)).data;
+
+        try {
+            return await getData();
+        } catch (err) {
             throw err;
         }
     }
