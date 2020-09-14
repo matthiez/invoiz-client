@@ -93,6 +93,34 @@ export type Article = {
     vatPercent?: number
 }
 
+type BaseArticlePostInvoiceArticle = {
+    amount: number
+    discount: number
+}
+
+export type ArticlePostInvoiceExisting = BaseArticlePostInvoiceArticle & {
+    id: number
+}
+
+export type ArticlePostInvoiceNew = BaseArticlePostInvoiceArticle & {
+    amount?: number
+    discount: number
+    price?: number
+    title?: string
+    unit?: string
+    vatPercent: number
+}
+
+export type ArticlePostInvoiceMixed = {
+    existingArticle: ArticlePostInvoiceExisting[]
+    newArticle: ArticlePostInvoiceNew[]
+}
+
+export type ArticlePostInvoice =
+    ArticlePostInvoiceMixed
+    | Omit<ArticlePostInvoiceMixed, 'newArticle'>
+    | Omit<ArticlePostInvoiceMixed, 'existingArticle'>
+
 export type ApiResponse<T> = {
     meta: {}
     data: T
@@ -141,6 +169,19 @@ export type Customer = {
     website: string
 }
 
+export type CustomerData = {
+    city: string
+    description: string
+    firstName: string
+    lastName: string
+    name: string
+    number: string
+    salutation: string
+    street: string
+    title: string
+    zipCode: string
+}
+
 export type Entity = {
     id: number
 }
@@ -162,17 +203,6 @@ export type ExpenseReceipt = {
     id: number
 }
 
-export type InvoiceMailParams = {
-    attachmentName: string
-    recipients: string[]
-    subject: string
-}
-
-export type InvoicePosition = {
-    id: number
-    title: string
-}
-
 export type Invoice = {
     cashDiscountTotal: number
     customerData: Customer
@@ -189,6 +219,54 @@ export type Invoice = {
     type: 'invoice'
 }
 
+export type InvoiceList = {
+    cashDiscountTotal: number
+    customerData: CustomerData
+    customerId: number
+    date: string
+    dueToDate: string
+    id: number
+    metaData: {
+        cancellation: {
+            date: string
+            id: number
+            number: number
+            totalNet: number
+            totalGross: number
+        }
+        currentDunning: {
+            date: string
+            label: string
+        }
+        nextDunning: {
+            date: string
+            dunningLevel: string
+            label: string
+        }
+    }
+    number: string
+    outstandingAmount: number
+    state: 'draft' | 'locked' | 'partiallyPaid' | 'paid' | 'cancelled'
+    totalGross: number
+    totalNet: number
+    type: 'invoice' | 'closingInvoice' | 'depositInvoice' | 'recurringInvoice' | 'recurringInvoiceTemplate'
+}
+
+export type InvoiceMailParams = {
+    attachmentName: string
+    recipients: string[]
+    subject: string
+}
+
+export type InvoicePosition = {
+    id: number
+    title: string
+}
+
+export type ItemValidationError = {
+    code: string
+}
+
 export type Miscellaneous = {
     articleCategories: string[]
     articleUnits: string[]
@@ -198,6 +276,10 @@ export type Miscellaneous = {
     salutations: string[]
     titles: string[]
     vats: number[]
+}
+
+export type NoContent = {
+    code: string
 }
 
 export type Offer = {
@@ -227,7 +309,6 @@ export type InvoicePayment = {
 }
 
 export type ToDo = {
-    title: string
     customerId?: number
     date: string
     doneAt?: string
@@ -235,6 +316,7 @@ export type ToDo = {
         description?: string
     }
     tenantId?: number
+    title: string
 }
 
 export type EntityArticle = Entity & Article;
@@ -251,12 +333,6 @@ export type PaginatedEntityInvoices = PaginatedResponse<EntityInvoice>;
 export type PaginatedOffers = PaginatedResponse<Offer>;
 export type PaginatedToDos = PaginatedResponse<EntityToDo>;
 
-export type ResponseArticle = ApiResponse<EntityArticle>;
-export type ResponseCustomer = ApiResponse<Customer>;
-export type ResponseExpense = ApiResponse<EntityExpense>;
-export type ResponseInvoice = ApiResponse<EntityInvoice>;
-export type ResponseOffer = ApiResponse<Offer>;
-
 export type PaginatedMethod = keyof Pick<InvoizClient,
     'getOffers' | 'getArticles' | 'getToDos'
     | 'getCustomers' | 'getExpenses' | 'getInvoices'>;
@@ -264,4 +340,76 @@ export type PaginatedMethod = keyof Pick<InvoizClient,
 export type ParameterlessGetMethod = keyof Pick<InvoizClient,
     'getMiscellaneousSettings' | 'getPayConditions'>;
 
+export type InfoSectionCustomField = {
+    label: string
+    value: string
+}
+
+type BasePostInvoice = {
+    date: string
+    infoSectionCustomFields?: [InfoSectionCustomField?, InfoSectionCustomField?, InfoSectionCustomField?]
+    options?: {
+        deliveryDateEnd?: number
+        deliveryDateStart?: string
+        dueDays?: number
+        showArticleNumber?: boolean
+    }
+    payConditionId: number
+    priceKind?: 'net' | 'gross'
+    texts?: {
+        conclusion?: boolean
+        introduction?: string
+    }
+    title?: string
+}
+
+export type PostInvoiceCustomerId = BasePostInvoice & {
+    customerData?: never
+    customerId: number
+}
+
+type BasePostInvoiceCustomerData<T> = BasePostInvoice & {
+    customerData: T
+    customerId?: never
+}
+
+export type PostInvoiceCustomerDataCompany = BasePostInvoiceCustomerData<{
+    kindCompany: {
+        city?: string
+        companyName: string
+        companyNameAffix?: string
+        country?: string
+        kind: 'company'
+        street?: string
+        zipCode?: string
+    }
+}>
+
+export type PostInvoiceCustomerDataPerson = BasePostInvoiceCustomerData<{
+    kindPerson: {
+        city?: string
+        countryIso?: string
+        firstName?: string
+        kind: 'person'
+        lastName: string
+        required: false
+        street?: string
+        zipCode?: string
+    }
+}>
+
+export type ResponseArticle = ApiResponse<EntityArticle>;
+export type ResponseCustomer = ApiResponse<Customer>;
+export type ResponseExpense = ApiResponse<EntityExpense>;
+export type ResponseInvoice = ApiResponse<EntityInvoice>;
+export type ResponseOffer = ApiResponse<Offer>;
+
 export type RetrieveMethod = PaginatedMethod | ParameterlessGetMethod;
+
+export type ValidationError = {
+    message: string
+    meta: {
+        [k: string]: ItemValidationError[]
+    }
+    name: string
+}

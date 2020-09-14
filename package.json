@@ -1,12 +1,14 @@
 {
     "name": "invoiz-client",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "description": "A wrapper for the invoiz.de API",
+    "homepage": "https://github.com/sms77io/js-invoiz-client",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "repository": "https://github.com/sms77io/js-invoiz-client",
     "scripts": {
         "build": "rm -rf dist && tsc",
+        "prepublishOnly": "npm run build",
         "test": "npx jest"
     },
     "author": "sms77 e.K.",
