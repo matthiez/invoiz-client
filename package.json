@@ -1,17 +1,21 @@
 {
     "name": "invoiz-client",
-    "version": "0.2.1",
+    "version": "0.2.2",
     "description": "A wrapper for the invoiz.de API",
-    "homepage": "https://github.com/sms77io/js-invoiz-client",
+    "homepage": "https://github.com/matthiez/js-invoiz-client",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
-    "repository": "https://github.com/sms77io/js-invoiz-client",
+    "repository": "https://github.com/matthiez/js-invoiz-client",
     "scripts": {
         "build": "rm -rf dist && tsc",
         "prepublishOnly": "npm run build",
         "test": "npx jest"
     },
-    "author": "sms77 e.K.",
+    "author": {
+        "email": "matthiez@gmail.com",
+        "name": "André Matthies",
+        "url": "https://github.com/matthiez/"
+    },
     "license": "MIT",
     "dependencies": {
         "axios": "^0.20.0"

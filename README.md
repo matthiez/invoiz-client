@@ -42,9 +42,3 @@ client.getInvoices()
 
 #### License
 Please see [License File](LICENSE) for more information.
-
-##### Need help?
-You are more than welcome to contact us via [Sms77.io](https://www.sms77.io) in order to get assistance.
-
-###### Brought to you by
-![Sms77.io Logo](https://www.sms77.io/wp-content/uploads/2019/07/sms77-Logo-400x79.png "sms77")
