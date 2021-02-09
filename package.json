@@ -5,6 +5,7 @@
     "homepage": "https://github.com/matthiez/js-invoiz-client",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
+    "keywords": ["invoiz", "api", "client"],
     "repository": "https://github.com/matthiez/js-invoiz-client",
     "scripts": {
         "build": "rm -rf dist && tsc",
