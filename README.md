@@ -16,29 +16,15 @@
 </figure>
 
 ### Usage
-<figure>
-<figcaption>JavaScript</figcaption>
-
 ```javascript
 const InvoizClient = require('invoiz-client');
-const client = new InvoizClient(process.env.INVOIZ_API_KEY, process.env.INVOIZ_API_KEY_SECRET);
+const client = new InvoizClient(
+    process.env.INVOIZ_API_KEY, process.env.INVOIZ_API_KEY_SECRET);
 client.getInvoices()
-    .then(invoices => console.log(invoices))
-    .then(error => console.error(error));
+    .then(console.log)
+    .then(console.error);
 ```
-</figure>
 
-<figure>
-<figcaption>JavaScript</figcaption>
-
-```javascript
-import InvoizClient from 'invoiz-client';
-const client = new InvoizClient(process.env.INVOIZ_API_KEY, process.env.INVOIZ_API_KEY_SECRET);
-client.getInvoices()
-    .then(invoices => console.log(invoices))
-    .then(error => console.error(error));
-```
-</figure>
 
 #### License
 Please see [License File](LICENSE) for more information.

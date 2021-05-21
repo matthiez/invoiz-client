@@ -2,7 +2,6 @@ import {
     Article,
     ArticlePaginationOptions,
     ArticleSetting,
-    AuthTokenResponse,
     Customer,
     CustomerPaginationOptions,
     Endpoint,
