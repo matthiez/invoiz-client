@@ -1,5 +1,12 @@
 import InvoizClient from './index';
 
+export type ClientConfig = {
+    accessToken?: string
+    apiKey: string
+    apiKeySecret: string
+    installationId?: string
+}
+
 export enum Endpoint {
     Article = 'article',
     AuthToken = 'auth/token',

@@ -5,7 +5,7 @@ describe('Auth related', () => {
     test('should return an access token', async () => {
         expect(environment.installationId).toBeInstanceOf(String);
 
-        const accessToken = await client.authToken(environment.installationId!);
+        const accessToken = await client.authToken(environment.installationId);
 
         expect(typeof accessToken).toBe('string');
 

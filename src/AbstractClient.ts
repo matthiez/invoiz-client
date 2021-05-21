@@ -2,24 +2,29 @@ import Axios, {AxiosInstance, AxiosRequestConfig} from 'axios';
 import {
     ApiResponse,
     AuthTokenResponse,
-    BasePaginationOptions,
+    BasePaginationOptions, ClientConfig,
     Endpoint,
     PaginatedResponse,
 } from './types';
 
 export abstract class AbstractClient {
+    protected readonly apiKey: string
+    protected readonly apiKeySecret: string
+    protected readonly installationId?: string
+    protected accessToken?: string
+
     protected instance: AxiosInstance = Axios.create({
         baseURL: 'https://app.invoiz.de/api/',
-
     });
 
-    public constructor(
-        protected apiKey: string,
-        protected apiKeySecret: string,
-        protected installationId: string,
-        accessToken?: string) {
-        if (accessToken) {
-            this.setAccessToken(accessToken);
+    public constructor(cfg: ClientConfig) {
+        this.accessToken = cfg.accessToken;
+        this.apiKey = cfg.apiKey;
+        this.apiKeySecret = cfg.apiKeySecret;
+        this.installationId = cfg.installationId;
+
+        if (this.accessToken) {
+            this.setAccessToken(this.accessToken);
         }
 
         this.instance.interceptors.request.use(async cfg => {
@@ -35,14 +40,14 @@ export abstract class AbstractClient {
         }, err => Promise.reject(err));
     }
 
-    async authToken():
+    async authToken(installationId: ClientConfig['installationId'] = this.installationId):
         Promise<AuthTokenResponse> {
         return this.tryCatch<AuthTokenResponse>({
             auth: {
                 password: this.apiKeySecret,
                 username: this.apiKey,
             },
-            data: {installationId: this.installationId},
+            data: {installationId},
             method: 'POST',
             url: Endpoint.AuthToken,
         });

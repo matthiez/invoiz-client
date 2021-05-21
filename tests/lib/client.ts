@@ -1,15 +1,15 @@
-import {InvoizClient} from '../../src';
+import {ok} from 'assert';
+import InvoizClient from '../../src';
 import environment from './environment';
 
-if (!environment.apiKey) {
-    throw new Error('environment.apiKey is missing!');
-}
+ok(environment.apiKey);
+ok(environment.apiKeySecret);
 
-if (!environment.apiKeySecret) {
-    throw new Error('environment.apiKeySecret is missing!');
-}
-
-const client = new InvoizClient(environment.apiKey, environment.apiKeySecret);
+const client = new InvoizClient({
+    apiKey: environment.apiKey,
+    apiKeySecret: environment.apiKeySecret,
+    installationId: '',
+});
 
 if (environment.accessToken) {
     client.setAccessToken(environment.accessToken);
