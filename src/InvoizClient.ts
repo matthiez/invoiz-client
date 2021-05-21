@@ -1,197 +1,134 @@
+import Axios, {AxiosInstance, AxiosRequestConfig} from 'axios';
 import {
-    Article,
-    ArticlePaginationOptions,
-    ArticleSetting,
-    Customer,
-    CustomerPaginationOptions,
+    ApiResponse,
+    AuthTokenResponse,
+    BasePaginationOptions, ClientConfig,
     Endpoint,
-    EntityArticle,
-    EntityExpense,
-    EntityInvoice,
-    EntityInvoicePayment,
-    EntityPayCondition,
-    EntityToDo,
-    Expense,
-    ExpensePaginationOptions,
-    ExpenseReceipt,
-    Invoice,
-    InvoiceMailParams,
-    InvoicePaginationOptions,
-    InvoicePayment,
-    Miscellaneous,
-    Offer,
-    OfferPaginationOptions,
-    PaginatedArticles,
-    PaginatedCustomers,
-    PaginatedEntityExpenses,
-    PaginatedEntityInvoices,
-    PaginatedOffers,
-    PaginatedToDos,
-    PayCondition,
-    ResponseArticle,
-    ResponseCustomer,
-    ResponseExpense,
-    ResponseInvoice,
-    ResponseOffer,
-    ToDo,
-    ToDoPaginationOptions
+    PaginatedResponse,
 } from './types';
-import {AbstractClient} from './AbstractClient';
+import {ArticlesResource} from './resources/ArticlesResource';
+import {CustomersResource} from './resources/CustomersResource';
+import {ExpensesResource} from './resources/ExpensesResource';
+import {InvoicesResource} from './resources/InvoicesResource';
+import {OffersResource} from './resources/OffersResource';
+import {PayConditionsResource} from './resources/PayConditionsResource';
+import {SettingsResource} from './resources/SettingsResource';
+import {TodosResource} from './resources/TodosResource';
 
-export class InvoizClient extends AbstractClient {
-    addInvoicePayment = async (id: number, data: InvoicePayment):
-        Promise<EntityInvoicePayment> =>
-        this.tryCatch({
-            data,
+export class InvoizClient {
+    public articles: ArticlesResource;
+    public customers: CustomersResource;
+    public expenses: ExpensesResource;
+    public invoices: InvoicesResource;
+    public offers: OffersResource;
+    public payConditions: PayConditionsResource;
+    public settings: SettingsResource;
+    public todos: TodosResource;
+
+    protected instance: AxiosInstance = Axios.create({
+        baseURL: 'https://app.invoiz.de/api/',
+    });
+
+    public constructor(protected readonly cfg: ClientConfig) {
+        this.articles = new ArticlesResource(this);
+        this.customers = new CustomersResource(this);
+        this.expenses = new ExpensesResource(this);
+        this.invoices = new InvoicesResource(this);
+        this.offers = new OffersResource(this);
+        this.payConditions = new PayConditionsResource(this);
+        this.settings = new SettingsResource(this);
+        this.todos = new TodosResource(this);
+
+        if (this.cfg.accessToken) this.setAccessToken(this.cfg.accessToken);
+
+        this.instance.interceptors.request.use(async cfg => {
+            if (!cfg.headers.Authorization && !cfg.auth) {
+                const token = (await this.authToken()).token;
+
+                this.setAccessToken(token);
+
+                cfg.headers.Authorization = this.getAccessToken();
+            }
+
+            return cfg;
+        }, Promise.reject);
+    }
+
+    async authToken(installationId: ClientConfig['installationId'] = this.cfg.installationId):
+        Promise<AuthTokenResponse> {
+        return this.tryCatch<AuthTokenResponse>({
+            auth: {
+                password: this.cfg.apiKeySecret,
+                username: this.cfg.apiKey,
+            },
+            data: {installationId},
             method: 'POST',
-            url: `${Endpoint.Invoice}/${id}/payment`,
-        });
-
-    downloadInvoice = async (id: number): Promise<Buffer> =>
-        this.tryCatch({
-            method: 'GET',
-            url: `${Endpoint.Invoice}/${id}/download`,
-        });
-
-    getArticle = async (id: number): Promise<ResponseArticle> =>
-        this.getById<EntityArticle>(id, Endpoint.Article);
-
-    getArticles = async (params?: ArticlePaginationOptions): Promise<PaginatedArticles> =>
-        this.paginated<EntityArticle>(Endpoint.Article, params);
-
-    getCustomer = async (id: number): Promise<ResponseCustomer> =>
-        this.getById<Customer>(id, Endpoint.Customer);
-
-    getCustomers = async (params?: CustomerPaginationOptions):
-        Promise<PaginatedCustomers> =>
-        this.paginated<Customer>(Endpoint.Customer, params);
-
-    getExpense = async (id: number): Promise<ResponseExpense> =>
-        this.getById<EntityExpense>(id, Endpoint.Expense);
-
-    getExpenses = async (params?: ExpensePaginationOptions):
-        Promise<PaginatedEntityExpenses> =>
-        this.paginated<EntityExpense>(Endpoint.Expense, params);
-
-    getInvoice = async (id: number): Promise<ResponseInvoice> =>
-        this.getById<EntityInvoice>(id, Endpoint.Invoice);
-
-    getInvoices = async (params?: InvoicePaginationOptions):
-        Promise<PaginatedEntityInvoices> =>
-        this.paginated<EntityInvoice>(Endpoint.Invoice, params);
-
-    getOffer = async (id: number): Promise<ResponseOffer> =>
-        this.getById<Offer>(id, Endpoint.Offer);
-
-    getOffers = async (params?: OfferPaginationOptions): Promise<PaginatedOffers> =>
-        this.paginated<Offer>(Endpoint.Offer, params);
-
-    getPayConditions = async (): Promise<EntityPayCondition[]> =>
-        this.tryCatch({
-            method: 'GET',
-            url: Endpoint.SettingPayCondition,
-        });
-
-    getMiscellaneousSettings = async (): Promise<Miscellaneous> =>
-        this.tryCatch({
-            method: 'GET',
-            url: Endpoint.SettingMiscellaneous,
-        });
-
-    getToDos = async (params?: ToDoPaginationOptions): Promise<PaginatedToDos> =>
-        this.paginated<EntityToDo>(Endpoint.ToDo, params);
-
-    addArticle = async (data: Article): Promise<EntityArticle> => {
-        return this.tryCatch({
-            data,
-            method: 'POST',
-            url: Endpoint.Article,
+            url: Endpoint.AuthToken,
         });
     };
 
-    addArticleSetting = async (data: ArticleSetting): Promise<ArticleSetting> =>
-        this.tryCatch({
-            data,
-            method: 'POST',
-            url: Endpoint.SettingArticle,
-        });
+    getAccessToken(strip: boolean = false): string | undefined {
+        const accessToken = this.instance.defaults.headers.Authorization;
 
-    addExpense = async (data: Expense): Promise<EntityExpense> =>
-        this.tryCatch({
-            data,
-            method: 'POST',
-            url: Endpoint.Expense,
-        });
+        if (accessToken && strip) {
+            return accessToken.replace('Bearer ', '');
+        }
 
-    addExpenseReceipt = async (filename: string, receipt: string):
-        Promise<ExpenseReceipt[]> =>
-        this.tryCatch({
-            data: {
-                filename, receipt,
-            },
-            headers: {
-                'content-type': 'multipart/form-data',
-            },
-            method: 'POST',
-            url: Endpoint.ExpenseReceipt,
-        });
+        return accessToken;
+    }
 
-    lockAndFinalizeInvoice = async (id: number): Promise<void> =>
-        this.tryCatch({
-            method: 'PUT',
-            url: `${Endpoint.Invoice}/${id}/lock`,
-        });
+    setAccessToken(accessToken?: string): void {
+        if (accessToken) {
+            accessToken =
+                accessToken.startsWith('Bearer ') ? accessToken : `Bearer ${accessToken}`;
 
-    addPayCondition = async (data: PayCondition): Promise<EntityPayCondition> =>
-        this.tryCatch({
-            data,
-            method: 'POST',
-            url: Endpoint.SettingPayCondition,
-        });
+            this.instance.defaults.headers.Authorization = accessToken;
+        } else {
+            delete this.instance.defaults.headers.Authorization;
+        }
+    }
 
-    addToDo = async (data: ToDo): Promise<EntityToDo> =>
-        this.tryCatch({
-            data,
-            method: 'POST',
-            url: Endpoint.ToDo,
+    async getById<T>(id: number, endpoint: Endpoint): Promise<ApiResponse<T>> {
+        return this.retry({
+            method: 'GET',
+            url: `${endpoint}/${id}`,
         });
+    }
 
-    addInvoice = async (data: Invoice): Promise<EntityInvoice> =>
-        this.tryCatch({
-            data,
-            method: 'POST',
-            url: `v2/${Endpoint.Invoice}`,
+    async paginated<T>(endpoint: string, params?: BasePaginationOptions)
+        : Promise<PaginatedResponse<T>> {
+        return this.retry({
+            method: 'GET',
+            params,
+            url: endpoint,
         });
+    }
 
-    mailInvoice = async (id: number, data: InvoiceMailParams)
-        : Promise<EntityInvoicePayment> =>
-        this.tryCatch({
-            data,
-            method: 'POST',
-            url: `${Endpoint.Invoice}/${id}/send`,
-        });
+    protected async retry<T = {}>(cfg: AxiosRequestConfig): Promise<T> {
+        try {
+            return await this.tryCatch(cfg);
+        } catch (err) {
+            if (401 === err.response.status) {
+                this.setAccessToken();
 
-    markToDoAsDone = async (id: number): Promise<EntityToDo> =>
-        this.tryCatch({
-            method: 'PUT',
-            url: `${Endpoint.ToDo}/${id}/doneAt`,
-        });
+                try {
+                    return await this.tryCatch(cfg);
+                } catch (err) {
+                    throw err;
+                }
+            }
 
-    removeExpenseReceipt = async (id: number): Promise<void> =>
-        this.tryCatch({
-            method: 'DELETE',
-            url: `${Endpoint.ExpenseReceipt}/${id}`,
-        });
+            throw err;
+        }
+    }
 
-    removeToDo = async (id: number): Promise<void> => this.tryCatch({
-        method: 'DELETE',
-        url: `${Endpoint.ToDo}/${id}`,
-    });
+    async tryCatch<T = {}>(cfg: AxiosRequestConfig): Promise<T> {
+        const getData = async () => (await this.instance.request(cfg)).data;
 
-    resetToDoDate = async (id: number, date: string): Promise<EntityToDo> =>
-        this.tryCatch({
-            data: {date},
-            method: 'PUT',
-            url: `${Endpoint.ToDo}/${id}/date`,
-        });
+        try {
+            return await getData();
+        } catch (err) {
+            throw err;
+        }
+    }
 }

@@ -3,24 +3,17 @@
 # TypeScript API Wrapper for the invoiz.de API
 
 ## Installation
-<figure>
-<figcaption>Via NPM</figcaption>
 
-```npm install invoiz-client```
-</figure>
+*Via NPM* `npm install invoiz-client`
 
-<figure>
-<figcaption>Via Yarn</figcaption>
-
-```yarn add invoiz-client```
-</figure>
+*Via Yarn* `yarn add invoiz-client`
 
 ### Usage
 ```javascript
 const InvoizClient = require('invoiz-client');
 const client = new InvoizClient(
     process.env.INVOIZ_API_KEY, process.env.INVOIZ_API_KEY_SECRET);
-client.getInvoices()
+client.invoices.paginated()
     .then(console.log)
     .then(console.error);
 ```

@@ -28,7 +28,7 @@ const assertArticleInDepth = (a: EntityArticle, o: ArticlePaginationOptions) => 
 };
 
 const assertArticles = async (opts: ArticlePaginationOptions): Promise<PaginatedArticles> => {
-    const articles = await client.getArticles(opts);
+    const articles = await client.articles.paginated(opts);
 
     assertPaginated<EntityArticle>(articles, opts, assertArticle);
 
@@ -59,7 +59,7 @@ describe('Article related', () => {
     });
 
     test('should return 1 article', async () => {
-        const response = await client.getArticle(id);
+        const response = await client.articles.byId(id);
 
         assertArticleInDepth(response.data, {});
     });

@@ -1,4 +1,11 @@
-import InvoizClient from './index';
+import {SettingsResource} from './resources/SettingsResource';
+import {PayConditionsResource} from './resources/PayConditionsResource';
+import {OffersResource} from './resources/OffersResource';
+import {ArticlesResource} from './resources/ArticlesResource';
+import {TodosResource} from './resources/TodosResource';
+import {CustomersResource} from './resources/CustomersResource';
+import {ExpensesResource} from './resources/ExpensesResource';
+import {InvoicesResource} from './resources/InvoicesResource';
 
 export type ClientConfig = {
     accessToken?: string
@@ -326,26 +333,29 @@ export type ToDo = {
     title: string
 }
 
-export type EntityArticle = Entity & Article;
-export type EntityExpense = Entity & Expense;
-export type EntityPayCondition = Entity & PayCondition;
-export type EntityToDo = Entity & ToDo;
-export type EntityInvoice = Entity & Invoice;
-export type EntityInvoicePayment = Entity & InvoicePayment;
+export type EntityArticle = Entity & Article
+export type EntityExpense = Entity & Expense
+export type EntityPayCondition = Entity & PayCondition
+export type EntityToDo = Entity & ToDo
+export type EntityInvoice = Entity & Invoice
+export type EntityInvoicePayment = Entity & InvoicePayment
 
-export type PaginatedArticles = PaginatedResponse<EntityArticle>;
-export type PaginatedCustomers = PaginatedResponse<Customer>;
-export type PaginatedEntityExpenses = PaginatedResponse<EntityExpense>;
-export type PaginatedEntityInvoices = PaginatedResponse<EntityInvoice>;
-export type PaginatedOffers = PaginatedResponse<Offer>;
-export type PaginatedToDos = PaginatedResponse<EntityToDo>;
+export type PaginatedArticles = PaginatedResponse<EntityArticle>
+export type PaginatedCustomers = PaginatedResponse<Customer>
+export type PaginatedEntityExpenses = PaginatedResponse<EntityExpense>
+export type PaginatedEntityInvoices = PaginatedResponse<EntityInvoice>
+export type PaginatedOffers = PaginatedResponse<Offer>
+export type PaginatedToDos = PaginatedResponse<EntityToDo>
 
-export type PaginatedMethod = keyof Pick<InvoizClient,
-    'getOffers' | 'getArticles' | 'getToDos'
-    | 'getCustomers' | 'getExpenses' | 'getInvoices'>;
+export type PaginatedMethod = keyof Pick<ArticlesResource, 'paginated'>
+    & keyof Pick<CustomersResource, 'paginated'>
+    & keyof Pick<ExpensesResource, 'paginated'>
+    & keyof Pick<InvoicesResource, 'paginated'>
+    & keyof Pick<OffersResource, 'paginated'>
+    & keyof Pick<TodosResource, 'paginated'>
 
-export type ParameterlessGetMethod = keyof Pick<InvoizClient,
-    'getMiscellaneousSettings' | 'getPayConditions'>;
+export type ParameterlessGetMethod = keyof Pick<SettingsResource, 'miscellaneous'>
+    & keyof Pick<PayConditionsResource, 'all'>
 
 export type InfoSectionCustomField = {
     label: string
@@ -354,7 +364,8 @@ export type InfoSectionCustomField = {
 
 type BasePostInvoice = {
     date: string
-    infoSectionCustomFields?: [InfoSectionCustomField?, InfoSectionCustomField?, InfoSectionCustomField?]
+    infoSectionCustomFields?:
+        [InfoSectionCustomField?, InfoSectionCustomField?, InfoSectionCustomField?]
     options?: {
         deliveryDateEnd?: number
         deliveryDateStart?: string
@@ -405,13 +416,13 @@ export type PostInvoiceCustomerDataPerson = BasePostInvoiceCustomerData<{
     }
 }>
 
-export type ResponseArticle = ApiResponse<EntityArticle>;
-export type ResponseCustomer = ApiResponse<Customer>;
-export type ResponseExpense = ApiResponse<EntityExpense>;
-export type ResponseInvoice = ApiResponse<EntityInvoice>;
-export type ResponseOffer = ApiResponse<Offer>;
+export type ResponseArticle = ApiResponse<EntityArticle>
+export type ResponseCustomer = ApiResponse<Customer>
+export type ResponseExpense = ApiResponse<EntityExpense>
+export type ResponseInvoice = ApiResponse<EntityInvoice>
+export type ResponseOffer = ApiResponse<Offer>
 
-export type RetrieveMethod = PaginatedMethod | ParameterlessGetMethod;
+export type RetrieveMethod = PaginatedMethod | ParameterlessGetMethod
 
 export type ValidationError = {
     message: string
