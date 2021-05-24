@@ -1,13 +1,7 @@
-//@ts-ignore
-import * as failFast from 'jasmine-fail-fast';
-
-//@ts-ignore
-const jasmineEnv = jasmine.getEnv();
-
-jasmineEnv.addReporter(failFast.init());
+import CustomMatcherResult = jest.CustomMatcherResult;
 
 expect.extend({
-    nilOrAny(received: any, expected: any) {
+    nilOrAny(received: any, expected: any): CustomMatcherResult {
         const receivedType = typeof received;
         let pass = received instanceof expected;
 
