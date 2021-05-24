@@ -104,7 +104,7 @@ export class InvoizClient {
         });
     }
 
-    async tryCatch<T extends {}>(cfg: AxiosRequestConfig): Promise<T> {
+    async tryCatch<T>(cfg: AxiosRequestConfig): Promise<T> {
         const getData = async () => (await this.instance.request(cfg)).data;
 
         try {
@@ -114,7 +114,7 @@ export class InvoizClient {
         }
     }
 
-    private async retry<T extends {}>(cfg: AxiosRequestConfig): Promise<T> {
+    private async retry<T>(cfg: AxiosRequestConfig): Promise<T> {
         try {
             return await this.tryCatch(cfg);
         } catch (e) {

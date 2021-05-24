@@ -15,7 +15,7 @@ export class TodosResource extends AbstractResource {
             url: Endpoint.ToDo,
         });
 
-    delete = async (id: number): Promise<void> => this.client.tryCatch({
+    delete = async (id: number): Promise<void> => this.client.tryCatch<void>({
         method: 'DELETE',
         url: `${Endpoint.ToDo}/${id}`,
     });
