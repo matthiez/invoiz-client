@@ -1,6 +1,6 @@
 ![invoiz Logo](https://www.invoiz.de/wp-content/uploads/2017/07/invoiz_600.png "invoiz")
 
-# TypeScript API Wrapper for the invoiz.de API
+# TypeScript API Client for the [invoiz.de](http://invoiz.de) API
 
 ## Installation
 

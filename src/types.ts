@@ -7,90 +7,9 @@ import {CustomersResource} from './resources/CustomersResource';
 import {ExpensesResource} from './resources/ExpensesResource';
 import {InvoicesResource} from './resources/InvoicesResource';
 
-export type ClientConfig = {
-    accessToken?: string
-    apiKey: string
-    apiKeySecret: string
-    installationId?: string
-}
-
-export enum Endpoint {
-    Article = 'article',
-    AuthToken = 'auth/token',
-    Customer = 'customer',
-    Expense = 'expense',
-    ExpenseReceipt = 'expense/receipt',
-    Invoice = 'invoice',
-    Offer = 'offer',
-    SettingArticle = 'setting/article',
-    SettingPayCondition = 'setting/payCondition',
-    SettingMiscellaneous = 'setting/miscellaneous',
-    ToDo = 'todo'
-}
-
-export type AuthTokenResponse = {
-    token: string
-}
-
-export type BasePaginationOptions = {
-    limit?: number
-    offset?: number
-}
-
-export type PaginationDescending = {
-    desc?: boolean
-}
-
-export type PaginationSearchText = {
-    searchText?: string
-}
-
-export type ArticlePaginationOptions =
-    BasePaginationOptions
-    & PaginationDescending
-    & PaginationSearchText
-    & {
-    orderBy?: 'number' | 'title'
-}
-
-export type CustomerPaginationOptions =
-    BasePaginationOptions
-    & PaginationDescending
-    & PaginationSearchText
-    & {
-    orderBy?: 'name' | 'number'
-}
-
-export type ExpensePaginationOptions =
-    BasePaginationOptions
-    & PaginationDescending
-    & PaginationSearchText
-    & {
-    orderBy?: 'date' | 'id' | 'payee' | 'payKind' | 'priceTotal'
-    filter?: 'all' | 'open' | 'paid'
-    payKind?: 'bank' | 'cash'
-}
-
-export type OfferPaginationOptions =
-    BasePaginationOptions
-    & PaginationDescending
-    & PaginationSearchText
-    & {
-    orderBy?: 'customerData.name' | 'number' | 'date' | 'totalNet' | 'totalGross'
-}
-
-export type ToDoPaginationOptions = BasePaginationOptions & {
-    activeFilter?: 'all' | 'future' | 'overdue'
-    customerId?: number
-}
-
-export type InvoicePaginationOptions =
-    BasePaginationOptions
-    & PaginationDescending
-    & PaginationSearchText
-    & {
-    filter?: 'all' | 'dunned' | 'partiallyPaid' | 'paid' | 'draft' | 'locked' | 'cancelled'
-    orderBy?: 'customerData.name' | 'date' | 'dueToDate' | 'totalNet' | 'totalGross'
+export type ApiResponse<T> = {
+    meta: {}
+    data: T
 }
 
 export type Article = {
@@ -107,27 +26,26 @@ export type Article = {
     vatPercent?: number
 }
 
-type BaseArticlePostInvoiceArticle = {
-    amount: number
-    discount: number
-}
-
-export type ArticlePostInvoiceExisting = BaseArticlePostInvoiceArticle & {
-    id: number
-}
-
-export type ArticlePostInvoiceNew = BaseArticlePostInvoiceArticle & {
-    amount?: number
-    discount: number
-    price?: number
-    title?: string
-    unit?: string
-    vatPercent: number
+export type ArticlePaginationOptions =
+    BasePaginationOptions
+    & PaginationDescending
+    & PaginationSearchText
+    & {
+    orderBy?: 'number' | 'title'
 }
 
 export type ArticlePostInvoiceMixed = {
-    existingArticle: ArticlePostInvoiceExisting[]
-    newArticle: ArticlePostInvoiceNew[]
+    existingArticle: BaseArticlePostInvoiceArticle & {
+        id: number
+    }[]
+    newArticle: BaseArticlePostInvoiceArticle & {
+        amount?: number
+        discount: number
+        price?: number
+        title?: string
+        unit?: string
+        vatPercent: number
+    }[]
 }
 
 export type ArticlePostInvoice =
@@ -135,23 +53,55 @@ export type ArticlePostInvoice =
     | Omit<ArticlePostInvoiceMixed, 'newArticle'>
     | Omit<ArticlePostInvoiceMixed, 'existingArticle'>
 
-export type ApiResponse<T> = {
-    meta: {}
-    data: T
-}
-
-export type PaginatedResponse<T> = {
-    meta: {
-        count: number
-        filter: any[]
-    }
-    data: T[]
-}
-
 export type ArticleSetting = {
     autoCreateArticles?: boolean
     categories?: string
     units?: string
+}
+
+export type AuthTokenResponse = {
+    token: string
+}
+
+type BaseArticlePostInvoiceArticle = {
+    amount: number
+    discount: number
+}
+
+type BasePostInvoiceCustomerData<T> = BasePostInvoice & {
+    customerData: T
+    customerId?: never
+}
+
+export type BasePaginationOptions = {
+    limit?: number
+    offset?: number
+}
+
+type BasePostInvoice = {
+    date: string
+    infoSectionCustomFields?:
+        [InfoSectionCustomField?, InfoSectionCustomField?, InfoSectionCustomField?]
+    options?: {
+        deliveryDateEnd?: number
+        deliveryDateStart?: string
+        dueDays?: number
+        showArticleNumber?: boolean
+    }
+    payConditionId: number
+    priceKind?: 'net' | 'gross'
+    texts?: {
+        conclusion?: boolean
+        introduction?: string
+    }
+    title?: string
+}
+
+export type ClientConfig = {
+    accessToken?: string
+    apiKey: string
+    apiKeySecret: string
+    installationId?: string
 }
 
 export type Customer = {
@@ -196,9 +146,38 @@ export type CustomerData = {
     zipCode: string
 }
 
+export type CustomerPaginationOptions =
+    BasePaginationOptions
+    & PaginationDescending
+    & PaginationSearchText
+    & {
+    orderBy?: 'name' | 'number'
+}
+
+export enum Endpoint {
+    Article = 'article',
+    AuthToken = 'auth/token',
+    Customer = 'customer',
+    Expense = 'expense',
+    ExpenseReceipt = 'expense/receipt',
+    Invoice = 'invoice',
+    Offer = 'offer',
+    SettingArticle = 'setting/article',
+    SettingPayCondition = 'setting/payCondition',
+    SettingMiscellaneous = 'setting/miscellaneous',
+    ToDo = 'todo'
+}
+
 export type Entity = {
     id: number
 }
+
+export type EntityArticle = Entity & Article
+export type EntityExpense = Entity & Expense
+export type EntityInvoice = Entity & Invoice
+export type EntityInvoicePayment = Entity & InvoicePayment
+export type EntityPayCondition = Entity & PayCondition
+export type EntityToDo = Entity & ToDo
 
 export type Expense = {
     date: string
@@ -213,8 +192,40 @@ export type Expense = {
     receipts?: ExpenseReceipt
 }
 
+export type ExpensePaginationOptions =
+    BasePaginationOptions
+    & PaginationDescending
+    & PaginationSearchText
+    & {
+    orderBy?: 'date' | 'id' | 'payee' | 'payKind' | 'priceTotal'
+    filter?: 'all' | 'open' | 'paid'
+    payKind?: 'bank' | 'cash'
+}
+
 export type ExpenseReceipt = {
     id: number
+}
+
+export type InvoicePaginationOptions =
+    BasePaginationOptions
+    & PaginationDescending
+    & PaginationSearchText
+    & {
+    filter?: 'all' | 'dunned' | 'partiallyPaid' | 'paid' | 'draft' | 'locked' | 'cancelled'
+    orderBy?: 'customerData.name' | 'date' | 'dueToDate' | 'totalNet' | 'totalGross'
+}
+
+export type OfferPaginationOptions =
+    BasePaginationOptions
+    & PaginationDescending
+    & PaginationSearchText
+    & {
+    orderBy?: 'customerData.name' | 'number' | 'date' | 'totalNet' | 'totalGross'
+}
+
+export type InfoSectionCustomField = {
+    label: string
+    value: string
 }
 
 export type Invoice = {
@@ -272,6 +283,12 @@ export type InvoiceMailParams = {
     subject: string
 }
 
+export type InvoicePayment = {
+    amount: number
+    notes: string
+    type: 'payment' | 'partial' | 'discount' | 'bankcharge' | 'surcharge'
+}
+
 export type InvoicePosition = {
     id: number
     title: string
@@ -316,29 +333,21 @@ export type PayCondition = {
     offerText?: string
 }
 
-export type InvoicePayment = {
-    amount: number
-    notes: string
-    type: 'payment' | 'partial' | 'discount' | 'bankcharge' | 'surcharge'
-}
-
-export type ToDo = {
-    customerId?: number
-    date: string
-    doneAt?: string
-    metaData?: {
-        description?: string
+export type PaginatedResponse<T> = {
+    meta: {
+        count: number
+        filter: any[]
     }
-    tenantId?: number
-    title: string
+    data: T[]
 }
 
-export type EntityArticle = Entity & Article
-export type EntityExpense = Entity & Expense
-export type EntityPayCondition = Entity & PayCondition
-export type EntityToDo = Entity & ToDo
-export type EntityInvoice = Entity & Invoice
-export type EntityInvoicePayment = Entity & InvoicePayment
+export type PaginationDescending = {
+    desc?: boolean
+}
+
+export type PaginationSearchText = {
+    searchText?: string
+}
 
 export type PaginatedArticles = PaginatedResponse<EntityArticle>
 export type PaginatedCustomers = PaginatedResponse<Customer>
@@ -357,38 +366,9 @@ export type PaginatedMethod = keyof Pick<ArticlesResource, 'paginated'>
 export type ParameterlessGetMethod = keyof Pick<SettingsResource, 'miscellaneous'>
     & keyof Pick<PayConditionsResource, 'all'>
 
-export type InfoSectionCustomField = {
-    label: string
-    value: string
-}
-
-type BasePostInvoice = {
-    date: string
-    infoSectionCustomFields?:
-        [InfoSectionCustomField?, InfoSectionCustomField?, InfoSectionCustomField?]
-    options?: {
-        deliveryDateEnd?: number
-        deliveryDateStart?: string
-        dueDays?: number
-        showArticleNumber?: boolean
-    }
-    payConditionId: number
-    priceKind?: 'net' | 'gross'
-    texts?: {
-        conclusion?: boolean
-        introduction?: string
-    }
-    title?: string
-}
-
 export type PostInvoiceCustomerId = BasePostInvoice & {
     customerData?: never
     customerId: number
-}
-
-type BasePostInvoiceCustomerData<T> = BasePostInvoice & {
-    customerData: T
-    customerId?: never
 }
 
 export type PostInvoiceCustomerDataCompany = BasePostInvoiceCustomerData<{
@@ -423,6 +403,22 @@ export type ResponseInvoice = ApiResponse<EntityInvoice>
 export type ResponseOffer = ApiResponse<Offer>
 
 export type RetrieveMethod = PaginatedMethod | ParameterlessGetMethod
+
+export type ToDo = {
+    customerId?: number
+    date: string
+    doneAt?: string
+    metaData?: {
+        description?: string
+    }
+    tenantId?: number
+    title: string
+}
+
+export type ToDoPaginationOptions = BasePaginationOptions & {
+    activeFilter?: 'all' | 'future' | 'overdue'
+    customerId?: number
+}
 
 export type ValidationError = {
     message: string

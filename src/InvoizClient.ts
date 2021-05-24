@@ -2,7 +2,8 @@ import Axios, {AxiosInstance, AxiosRequestConfig} from 'axios';
 import {
     ApiResponse,
     AuthTokenResponse,
-    BasePaginationOptions, ClientConfig,
+    BasePaginationOptions,
+    ClientConfig,
     Endpoint,
     PaginatedResponse,
 } from './types';
@@ -16,6 +17,8 @@ import {SettingsResource} from './resources/SettingsResource';
 import {TodosResource} from './resources/TodosResource';
 
 export class InvoizClient {
+    public readonly ApiVersion = '0.0.2';
+
     public articles: ArticlesResource;
     public customers: CustomersResource;
     public expenses: ExpensesResource;
@@ -54,7 +57,8 @@ export class InvoizClient {
         }, Promise.reject);
     }
 
-    async authToken(installationId: ClientConfig['installationId'] = this.cfg.installationId):
+    async authToken(
+        installationId: ClientConfig['installationId'] = this.cfg.installationId):
         Promise<AuthTokenResponse> {
         return this.tryCatch<AuthTokenResponse>({
             auth: {
@@ -70,9 +74,7 @@ export class InvoizClient {
     getAccessToken(strip: boolean = false): string | undefined {
         const accessToken = this.instance.defaults.headers.Authorization;
 
-        if (accessToken && strip) {
-            return accessToken.replace('Bearer ', '');
-        }
+        if (accessToken && strip) return accessToken.replace('Bearer ', '');
 
         return accessToken;
     }
@@ -83,13 +85,11 @@ export class InvoizClient {
                 accessToken.startsWith('Bearer ') ? accessToken : `Bearer ${accessToken}`;
 
             this.instance.defaults.headers.Authorization = accessToken;
-        } else {
-            delete this.instance.defaults.headers.Authorization;
-        }
+        } else delete this.instance.defaults.headers.Authorization;
     }
 
     async getById<T>(id: number, endpoint: Endpoint): Promise<ApiResponse<T>> {
-        return this.retry({
+        return this.retry<ApiResponse<T>>({
             method: 'GET',
             url: `${endpoint}/${id}`,
         });
@@ -104,31 +104,31 @@ export class InvoizClient {
         });
     }
 
-    protected async retry<T = {}>(cfg: AxiosRequestConfig): Promise<T> {
-        try {
-            return await this.tryCatch(cfg);
-        } catch (err) {
-            if (401 === err.response.status) {
-                this.setAccessToken();
-
-                try {
-                    return await this.tryCatch(cfg);
-                } catch (err) {
-                    throw err;
-                }
-            }
-
-            throw err;
-        }
-    }
-
-    async tryCatch<T = {}>(cfg: AxiosRequestConfig): Promise<T> {
+    async tryCatch<T extends {}>(cfg: AxiosRequestConfig): Promise<T> {
         const getData = async () => (await this.instance.request(cfg)).data;
 
         try {
             return await getData();
-        } catch (err) {
-            throw err;
+        } catch (e) {
+            throw e;
+        }
+    }
+
+    private async retry<T extends {}>(cfg: AxiosRequestConfig): Promise<T> {
+        try {
+            return await this.tryCatch(cfg);
+        } catch (e) {
+            if (401 === e.response.status) {
+                this.setAccessToken();
+
+                try {
+                    return await this.tryCatch(cfg);
+                } catch (e) {
+                    throw e;
+                }
+            }
+
+            throw e;
         }
     }
 }
