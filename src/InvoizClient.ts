@@ -1,4 +1,4 @@
-import Axios, {AxiosInstance, AxiosRequestConfig} from 'axios';
+import Axios, {AxiosError, AxiosInstance, AxiosRequestConfig} from 'axios'
 import {
     ApiResponse,
     AuthTokenResponse,
@@ -45,12 +45,12 @@ export class InvoizClient {
         if (this.cfg.accessToken) this.setAccessToken(this.cfg.accessToken);
 
         this.instance.interceptors.request.use(async cfg => {
-            if (!cfg.headers.Authorization && !cfg.auth) {
-                const token = (await this.authToken()).token;
+            if (!cfg.headers?.Authorization && !cfg.auth) {
+                const {token} = await this.authToken();
 
                 this.setAccessToken(token);
 
-                cfg.headers.Authorization = this.getAccessToken();
+                cfg.headers!.Authorization = this.getAccessToken()!;
             }
 
             return cfg;
@@ -72,11 +72,12 @@ export class InvoizClient {
     };
 
     getAccessToken(strip: boolean = false): string | undefined {
-        const accessToken = this.instance.defaults.headers.Authorization;
+        const accessToken = this.instance.defaults.headers.common.Authorization;
 
-        if (accessToken && strip) return accessToken.replace('Bearer ', '');
+        if (typeof accessToken === 'string')
+            return strip ? accessToken.replace('Bearer ', '') : accessToken
 
-        return accessToken;
+        return undefined;
     }
 
     setAccessToken(accessToken?: string): void {
@@ -84,8 +85,8 @@ export class InvoizClient {
             accessToken =
                 accessToken.startsWith('Bearer ') ? accessToken : `Bearer ${accessToken}`;
 
-            this.instance.defaults.headers.Authorization = accessToken;
-        } else delete this.instance.defaults.headers.Authorization;
+            this.instance.defaults.headers.common.Authorization = accessToken;
+        } else delete this.instance.defaults.headers.common.Authorization;
     }
 
     async getById<T>(id: number, endpoint: Endpoint): Promise<ApiResponse<T>> {
@@ -118,7 +119,7 @@ export class InvoizClient {
         try {
             return await this.tryCatch(cfg);
         } catch (e) {
-            if (401 === e.response.status) {
+            if (401 === (e as AxiosError).response?.status) {
                 this.setAccessToken();
 
                 try {
